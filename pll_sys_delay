@@ -1,0 +1,89 @@
+//Define Address of register to be used
+
+#define GPIO_PORT_F_DATA_R     (* ((volatile unsigned long *) 0x4002507C))
+#define GPIO_PORT_F_DIR_R      (* ((volatile unsigned long *) 0x40025400))
+#define GPIO_PORT_F_AFSEL_R    (* ((volatile unsigned long *) 0x40025420))
+#define GPIO_PORT_F_PUR_R      (* ((volatile unsigned long *) 0x40025510))
+#define GPIO_PORT_F_LOCK_R     (* ((volatile unsigned long *) 0x40025520))
+#define GPIO_PORT_F_DEN_R      (* ((volatile unsigned long *) 0x4002551C))
+#define GPIO_PORT_F_CR_R       (* ((volatile unsigned long *) 0x40025524))
+#define GPIO_PORT_F_AMSEL_R    (* ((volatile unsigned long *) 0x40025528))
+#define GPIO_PORT_F_PCTL_R     (* ((volatile unsigned long *) 0x4002552C))
+#define SYSCTL_RCGC2_R         (* ((volatile unsigned long *) 0x400FE108)) 
+#define SYSCTL_RIS_R           (*((volatile unsigned long *)0x400FE050))
+#define SYSCTL_RCC2_R          (*((volatile unsigned long *)0x400FE070))
+#define SYSCTL_RCC_R           (*((volatile unsigned long *)0x400FE060))
+
+	
+void PLL_Init(void){
+SYSCTL_RCC2_R |=  0x80000000;  												     
+SYSCTL_RCC2_R |=  0x00000800;  												     
+SYSCTL_RCC_R = (SYSCTL_RCC_R &~0x000007C0) + 0x00000540;    
+SYSCTL_RCC2_R &= ~0x00000070;                               
+SYSCTL_RCC2_R &= ~0x00002000;                               
+SYSCTL_RCC2_R |= 0x40000000;                                
+SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (4<<22);     
+while((SYSCTL_RIS_R&0x00000040)==0){};                          
+SYSCTL_RCC2_R &= ~(0x00000800);                             
+}
+
+#define NVIC_ST_CTRL_R      (*((volatile unsigned long *)0xE000E010))
+#define NVIC_ST_RELOAD_R    (*((volatile unsigned long *)0xE000E014))
+#define NVIC_ST_CURRENT_R   (*((volatile unsigned long *)0xE000E018))
+void SysTick_Init(void){
+NVIC_ST_CTRL_R = 0;               
+NVIC_ST_CTRL_R = 0x00000005;      
+}
+
+void SysTick_Wait(unsigned long delay){
+NVIC_ST_RELOAD_R = delay-1;  									// number of counts 
+NVIC_ST_CURRENT_R = 0;       									//   clears CURRENT REGISTER
+while((NVIC_ST_CTRL_R&0x00010000)==0){ 				// wait for count flag
+}
+}
+
+void SysTick_Wait10ms(unsigned long delay){
+unsigned long i;
+for(i=0; i<delay; i++){
+SysTick_Wait(400000);  
+}
+}
+
+// Intialize GPIO Port F
+void PORTF_Init(void){
+	volatile unsigned long delay;
+	SYSCTL_RCGC2_R |= 0x00000020;         
+	delay = SYSCTL_RCGC2_R;
+	GPIO_PORT_F_LOCK_R  = 0x4C4F434B;      
+  GPIO_PORT_F_CR_R    = 0x0E;	           
+	GPIO_PORT_F_AFSEL_R = 0x00;            
+  GPIO_PORT_F_PCTL_R  = 0x00000000;      
+	GPIO_PORT_F_DIR_R   = 0x0E;            
+	GPIO_PORT_F_AMSEL_R = 0x00;           
+	GPIO_PORT_F_DEN_R   = 0x1F;             
+}
+void PORTF_Init(void);
+void Delay(void);
+void SysTick_Wait10ms(unsigned long delay);
+void SysTick_Wait(unsigned long delay);
+void SysTick_Init(void);
+void PLL_Init(void);
+
+
+// Main Program
+int main(void){
+	PORTF_Init();
+	PLL_Init();
+	SysTick_Init();
+	while(1){
+	SysTick_Wait10ms(1000);  				 			
+	GPIO_PORT_F_DATA_R = 0x02;  					
+	SysTick_Wait10ms(2000); 								
+}
+}
+
+
+
+
+
+

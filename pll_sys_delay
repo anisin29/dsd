@@ -42,7 +42,7 @@ while((NVIC_ST_CTRL_R&0x00010000)==0){ 				// wait for count flag
 }
 }
 
-void SysTick_Wait10ms(unsigned long delay){
+void SysTick_Wait5ms(unsigned long delay){
 unsigned long i;
 for(i=0; i<delay; i++){
 SysTick_Wait(400000);     // 5msec delay
@@ -64,7 +64,7 @@ void PORTF_Init(void){
 }
 void PORTF_Init(void);
 void Delay(void);
-void SysTick_Wait10ms(unsigned long delay);
+void SysTick_Wait5ms(unsigned long delay);
 void SysTick_Wait(unsigned long delay);
 void SysTick_Init(void);
 void PLL_Init(void);
@@ -76,15 +76,15 @@ int main(void){
 	PLL_Init();
 	SysTick_Init();
 	while(1){
-	SysTick_Wait10ms(1000);  					//5sec			 			
+	SysTick_Wait5ms(1000);  					//5sec			 			
 	GPIO_PORT_F_DATA_R = 0x02;  					 // R				
-	SysTick_Wait10ms(2000);  					// 10sec
+	SysTick_Wait5ms(2000);  					// 10sec
 	GPIO_PORT_F_DATA_R = 0x08;                                                  //G
-	SysTick_Wait10ms(3000); 					     // 15 sec
+	SysTick_Wait5ms(3000); 					     // 15 sec
 	GPIO_PORT_F_DATA_R = 0x04;  					     //B
-	SysTick_Wait10ms(4000); 							//20 sec 
+	SysTick_Wait5ms(4000); 							//20 sec 
 	GPIO_PORT_F_DATA_R = 0x0E; 						//ALL 
-	SysTick_Wait10ms(5000);  							//25 sec
+	SysTick_Wait5ms(5000);  							//25 sec
   GPIO_PORT_F_DATA_R = 0x00; 						// OFF
 }
 }
